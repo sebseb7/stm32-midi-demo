@@ -22,8 +22,6 @@
 #include <usb.h>
 #include <usb_midi.h>
 
-// this module can be optionally disabled in a local config.h file (included from mios32.h)
-
 #include "libs/irq.h"
 
 #include <usb_core.h>

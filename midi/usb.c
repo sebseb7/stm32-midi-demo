@@ -1,12 +1,10 @@
 // $Id: usb.c 2026 2014-07-06 20:25:45Z tk $
 //! \defgroup USB
 //!
-//! USB driver for MIOS32
+//! USB driver for MIDI
 //! 
 //! Based on driver included in STM32 USB library
 //! Some code copied and modified from Virtual_COM_Port demo
-//! 
-//! Applications shouldn't call these functions directly, instead please use \ref COM or \ref MIDI layer functions
 //! 
 //! \{
 /* ==========================================================================
@@ -24,9 +22,6 @@
 
 #include <usb.h>
 #include <usb_midi.h>
-
-// this module can be optionally disabled in a local config.h file (included from mios32.h)
-
 
 #include "libs/delay.h"
 #include "libs/irq.h"
