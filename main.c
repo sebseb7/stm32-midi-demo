@@ -4,7 +4,7 @@
 #include "libs/spi.h"
 
 #include "mios32_usb.h"
-#include "mios32_midi.h"
+//#include "midi.h"
 #include "libs/delay.h"
 #include "mios32_usb_midi.h"
 
@@ -67,7 +67,7 @@ int main(void)
 
 	DELAY_Init();
 	MIOS32_USB_Init(0);
-	MIOS32_MIDI_Init(0);
+//	MIOS32_MIDI_Init(0);
 	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 	

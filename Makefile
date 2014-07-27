@@ -13,16 +13,15 @@ CORTEXM=4
 endif
 
 
-SRC=$(wildcard  *.c usb/*.c midi/*.c) \
-	core/syscalls.c core/stm32fxxx_it.c core/system_stm32f$(STM32F)xx.c \
-	libs/hsv2rgb.c \
-	libs/math_emb.c \
-	libs/delay.c \
-	libs/spi.c
+SRC=$(wildcard  *.c usb/*.c midi/*.c libs/*.c) \
+	core/syscalls.c \
+	core/stm32fxxx_it.c \
+	core/system_stm32f$(STM32F)xx.c 
+
 ASRC=core/startup_stm32f$(STM32F)xx.s
 OBJECTS= $(SRC:.c=.o) $(ASRC:.s=.o)
 LSTFILES= $(SRC:.c=.lst)
-HEADERS=$(wildcard usb/*.h core/*.h *.h libs/math.h libs/spi.h)
+HEADERS=$(wildcard usb/*.h core/*.h *.h midi/*.h libs/*.h)
 
 #  Compiler Options
 GCFLAGS = -DSTM32F=$(STM32F) -ffreestanding -std=gnu99 -mcpu=cortex-m$(CORTEXM) -mthumb $(OPTIMIZATION) -I. -Imidi -Icore -Iusb -DARM_MATH_CM$(CORTEXM) -DUSE_STDPERIPH_DRIVER 

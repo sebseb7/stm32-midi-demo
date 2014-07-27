@@ -10,21 +10,7 @@
 #ifndef _MIOS32_CONFIG_H
 #define _MIOS32_CONFIG_H
 
-#define MIOS32_DONT_USE_UART
-#define MIOS32_DONT_USE_IIC
-#define MIOS32_DONT_USE_SPI
-#define MIOS32_DONT_USE_UART_MIDI
-#define MIOS32_DONT_USE_IIC_MIDI
-#define MIOS32_DONT_USE_SPI_MIDI
-#define MIOS32_DONT_USE_USB_HOST
-
-// The boot message which is print during startup and returned on a SysEx query
-
-// how many SPI MIDI ports are available?
-// if 0: interface disabled (default)
-// other allowed values: 1..8
-
-// enable 4 USB MIDI ports
+// enable 1 USB MIDI ports
 #define MIOS32_USB_MIDI_NUM_PORTS 1
 
 

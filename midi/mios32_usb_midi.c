@@ -23,6 +23,8 @@
 
 // this module can be optionally disabled in a local mios32_config.h file (included from mios32.h)
 
+#include "libs/irq.h"
+
 #include <usb_core.h>
 #include <usbd_req.h>
 #include <usb_regs.h>
@@ -154,12 +156,12 @@ s32 MIOS32_USB_MIDI_PackageSend_NonBlocking(mios32_midi_package_t package)
   }
 
   // put package into buffer - this operation should be atomic!
-  MIOS32_IRQ_Disable();
+  IRQ_Disable();
   tx_buffer[tx_buffer_head++] = package.ALL;
   if( tx_buffer_head >= MIOS32_USB_MIDI_TX_BUFFER_SIZE )
     tx_buffer_head = 0;
   ++tx_buffer_size;
-  MIOS32_IRQ_Enable();
+  IRQ_Enable();
 
   return 0;
 }
@@ -212,12 +214,12 @@ s32 MIOS32_USB_MIDI_PackageReceive(mios32_midi_package_t *package)
     return -1;
 
   // get package - this operation should be atomic!
-  MIOS32_IRQ_Disable();
+  IRQ_Disable();
   package->ALL = rx_buffer[rx_buffer_tail];
   if( ++rx_buffer_tail >= MIOS32_USB_MIDI_RX_BUFFER_SIZE )
     rx_buffer_tail = 0;
   --rx_buffer_size;
-  MIOS32_IRQ_Enable();
+  IRQ_Enable();
 
   return rx_buffer_size;
 }
@@ -266,7 +268,7 @@ static void MIOS32_USB_MIDI_TxBufferHandler(void)
   //   - the device is configured
 
   // atomic operation to avoid conflict with other interrupts
-  MIOS32_IRQ_Disable();
+  IRQ_Disable();
 
   if( !tx_buffer_busy && tx_buffer_size && transfer_possible ) {
     s16 count = (tx_buffer_size > (MIOS32_USB_MIDI_DATA_IN_SIZE/4)) ? (MIOS32_USB_MIDI_DATA_IN_SIZE/4) : tx_buffer_size;
@@ -288,7 +290,7 @@ static void MIOS32_USB_MIDI_TxBufferHandler(void)
     DCD_EP_Tx(&USB_OTG_dev, MIOS32_USB_MIDI_DATA_IN_EP, (uint8_t*)&USB_tx_buffer, count*4);
   }
 
-  MIOS32_IRQ_Enable();
+  IRQ_Enable();
 }
 
 
@@ -307,7 +309,7 @@ static void MIOS32_USB_MIDI_RxBufferHandler(void)
   }
 
   // atomic operation to avoid conflict with other interrupts
-  MIOS32_IRQ_Disable();
+  IRQ_Disable();
 
   // check if we can receive new data and get packages to be received from OUT pipe
   u32 ep_num = MIOS32_USB_MIDI_DATA_OUT_EP & 0x7f;
@@ -323,7 +325,8 @@ static void MIOS32_USB_MIDI_RxBufferHandler(void)
 	mios32_midi_package_t package;
 	package.ALL = *buf_addr++;
 
-	if( MIOS32_MIDI_SendPackageToRxCallback(USB0 + package.cable, package) == 0 ) {
+	//if( MIOS32_MIDI_SendPackageToRxCallback(USB0 + package.cable, package) == 0 ) 
+	{
 	  rx_buffer[rx_buffer_head] = package.ALL;
 
 	  if( ++rx_buffer_head >= MIOS32_USB_MIDI_RX_BUFFER_SIZE )
@@ -343,7 +346,7 @@ static void MIOS32_USB_MIDI_RxBufferHandler(void)
     }
   }
 
-  MIOS32_IRQ_Enable();
+  IRQ_Enable();
 }
 
 

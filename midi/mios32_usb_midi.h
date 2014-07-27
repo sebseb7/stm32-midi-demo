@@ -14,6 +14,8 @@
 #ifndef _MIOS32_USB_MIDI_H
 #define _MIOS32_USB_MIDI_H
 
+#include "midi.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // Global definitions
 /////////////////////////////////////////////////////////////////////////////
@@ -25,7 +27,7 @@
 
 // allowed numbers: 1..8
 #ifndef MIOS32_USB_MIDI_NUM_PORTS
-#define MIOS32_USB_MIDI_NUM_PORTS 2
+#define MIOS32_USB_MIDI_NUM_PORTS 1
 #endif
 
 // buffer size (should be at least >= MIOS32_USB_MIDI_DESC_DATA_*_SIZE/4)

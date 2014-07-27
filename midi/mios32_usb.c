@@ -28,6 +28,7 @@
 
 
 #include "libs/delay.h"
+#include "libs/irq.h"
 
 #include <usbd_core.h>
 #include <usbd_def.h>
@@ -883,7 +884,7 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
 */
 void USB_OTG_BSP_EnableInterrupt(USB_OTG_CORE_HANDLE *pdev)
 {
-  MIOS32_IRQ_Install(OTG_FS_IRQn, MIOS32_IRQ_USB_PRIORITY);
+  IRQ_Install(OTG_FS_IRQn, IRQ_USB_PRIORITY);
 }
 
 /**
