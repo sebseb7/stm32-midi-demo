@@ -33,7 +33,7 @@
 #define USBD_ITF_MAX_NUM           1
 
 // created in STM32_USB_Device_Library/Core/src/usbd_req.c
-// used in mios32_usb.c as temporary string buffer
+// used in usb.c as temporary string buffer
 #define USB_MAX_STR_DESC_SIZ       100
 extern uint8_t USBD_StrDesc[USB_MAX_STR_DESC_SIZ];
 
