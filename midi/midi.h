@@ -9,7 +9,7 @@ typedef enum {
 	ProgramChange = 0xc,
 	Aftertouch    = 0xd,
 	PitchBend     = 0xe
-} mios32_midi_event_t;
+} midi_event_t;
 
 
 typedef union {
@@ -46,7 +46,7 @@ typedef union {
 		u8 cc_number:8;
 		u8 value:8;
 	};
-} mios32_midi_package_t;
+} midi_package_t;
 
 #endif /* _MIOS32_MIDI_H */
 

@@ -1,9 +1,9 @@
-// $Id: mios32_usb_midi.c 2025 2014-07-06 18:22:18Z tk $
-//! \defgroup MIOS32_USB_MIDI
+// $Id: usb_midi.c 2025 2014-07-06 18:22:18Z tk $
+//! \defgroup USB_MIDI
 //!
 //! USB MIDI layer for MIOS32
 //! 
-//! Applications shouldn't call these functions directly, instead please use \ref MIOS32_MIDI layer functions
+//! Applications shouldn't call these functions directly, instead please use \ref MIDI layer functions
 //! 
 //! \{
 /* ==========================================================================
@@ -19,10 +19,10 @@
 // Include files
 /////////////////////////////////////////////////////////////////////////////
 
-#include <mios32_usb.h>
-#include <mios32_usb_midi.h>
+#include <usb.h>
+#include <usb_midi.h>
 
-// this module can be optionally disabled in a local mios32_config.h file (included from mios32.h)
+// this module can be optionally disabled in a local config.h file (included from mios32.h)
 
 #include "libs/irq.h"
 
@@ -31,18 +31,18 @@
 #include <usb_regs.h>
 
 
-// imported from mios32_usb.c
+// imported from usb.c
 extern USB_OTG_CORE_HANDLE  USB_OTG_dev;
-extern uint32_t USB_rx_buffer[MIOS32_USB_MIDI_DATA_OUT_SIZE/4];
-static uint32_t USB_tx_buffer[MIOS32_USB_MIDI_DATA_IN_SIZE/4];
+extern uint32_t USB_rx_buffer[USB_MIDI_DATA_OUT_SIZE/4];
+static uint32_t USB_tx_buffer[USB_MIDI_DATA_IN_SIZE/4];
 
 
 /////////////////////////////////////////////////////////////////////////////
 // Local prototypes
 /////////////////////////////////////////////////////////////////////////////
 
-static void MIOS32_USB_MIDI_TxBufferHandler(void);
-static void MIOS32_USB_MIDI_RxBufferHandler(void);
+static void USB_MIDI_TxBufferHandler(void);
+static void USB_MIDI_RxBufferHandler(void);
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -50,14 +50,14 @@ static void MIOS32_USB_MIDI_RxBufferHandler(void);
 /////////////////////////////////////////////////////////////////////////////
 
 // Rx buffer
-static u32 rx_buffer[MIOS32_USB_MIDI_RX_BUFFER_SIZE];
+static u32 rx_buffer[USB_MIDI_RX_BUFFER_SIZE];
 static volatile u16 rx_buffer_tail;
 static volatile u16 rx_buffer_head;
 static volatile u16 rx_buffer_size;
 static volatile u8 rx_buffer_new_data;
 
 // Tx buffer
-static u32 tx_buffer[MIOS32_USB_MIDI_TX_BUFFER_SIZE];
+static u32 tx_buffer[USB_MIDI_TX_BUFFER_SIZE];
 static volatile u16 tx_buffer_tail;
 static volatile u16 tx_buffer_head;
 static volatile u16 tx_buffer_size;
@@ -71,9 +71,9 @@ static u8 transfer_possible = 0;
 //! Initializes USB MIDI layer
 //! \param[in] mode currently only mode 0 supported
 //! \return < 0 if initialisation failed
-//! \note Applications shouldn't call this function directly, instead please use \ref MIOS32_MIDI layer functions
+//! \note Applications shouldn't call this function directly, instead please use \ref MIDI layer functions
 /////////////////////////////////////////////////////////////////////////////
-s32 MIOS32_USB_MIDI_Init(u32 mode)
+s32 USB_MIDI_Init(u32 mode)
 {
   // currently only mode 0 supported
   if( mode != 0 )
@@ -87,9 +87,9 @@ s32 MIOS32_USB_MIDI_Init(u32 mode)
 //! This function is called by the USB driver on cable connection/disconnection
 //! \param[in] connected status (1 if connected)
 //! \return < 0 on errors
-//! \note Applications shouldn't call this function directly, instead please use \ref MIOS32_MIDI layer functions
+//! \note Applications shouldn't call this function directly, instead please use \ref MIDI layer functions
 /////////////////////////////////////////////////////////////////////////////
-s32 MIOS32_USB_MIDI_ChangeConnectionState(u8 connected)
+s32 USB_MIDI_ChangeConnectionState(u8 connected)
 {
   // in all cases: re-initialize USB MIDI driver
   // clear buffer counters and busy/wait signals again (e.g., so that no invalid data will be sent out)
@@ -115,11 +115,11 @@ s32 MIOS32_USB_MIDI_ChangeConnectionState(u8 connected)
 //! \param[in] cable number
 //! \return 1: interface available
 //! \return 0: interface not available
-//! \note Applications shouldn't call this function directly, instead please use \ref MIOS32_MIDI layer functions
+//! \note Applications shouldn't call this function directly, instead please use \ref MIDI layer functions
 /////////////////////////////////////////////////////////////////////////////
-s32 MIOS32_USB_MIDI_CheckAvailable(u8 cable)
+s32 USB_MIDI_CheckAvailable(u8 cable)
 {
-  if( cable >= MIOS32_USB_MIDI_NUM_PORTS )
+  if( cable >= USB_MIDI_NUM_PORTS )
     return 0;
 
   return transfer_possible ? 1 : 0;
@@ -133,19 +133,19 @@ s32 MIOS32_USB_MIDI_CheckAvailable(u8 cable)
 //! \return -1: USB not connected
 //! \return -2: buffer is full
 //!             caller should retry until buffer is free again
-//! \note Applications shouldn't call this function directly, instead please use \ref MIOS32_MIDI layer functions
+//! \note Applications shouldn't call this function directly, instead please use \ref MIDI layer functions
 /////////////////////////////////////////////////////////////////////////////
-s32 MIOS32_USB_MIDI_PackageSend_NonBlocking(mios32_midi_package_t package)
+s32 USB_MIDI_PackageSend_NonBlocking(midi_package_t package)
 {
   // device available?
   if( !transfer_possible )
     return -1;
 
   // buffer full?
-  if( tx_buffer_size >= (MIOS32_USB_MIDI_TX_BUFFER_SIZE-1) ) {
+  if( tx_buffer_size >= (USB_MIDI_TX_BUFFER_SIZE-1) ) {
     // call USB handler, so that we are able to get the buffer free again on next execution
     // (this call simplifies polling loops!)
-    MIOS32_USB_MIDI_TxBufferHandler();
+    USB_MIDI_TxBufferHandler();
 
     // device still available?
     // (ensures that polling loop terminates if cable has been disconnected)
@@ -159,7 +159,7 @@ s32 MIOS32_USB_MIDI_PackageSend_NonBlocking(mios32_midi_package_t package)
   // put package into buffer - this operation should be atomic!
   IRQ_Disable();
   tx_buffer[tx_buffer_head++] = package.ALL;
-  if( tx_buffer_head >= MIOS32_USB_MIDI_TX_BUFFER_SIZE )
+  if( tx_buffer_head >= USB_MIDI_TX_BUFFER_SIZE )
     tx_buffer_head = 0;
   ++tx_buffer_size;
   IRQ_Enable();
@@ -173,9 +173,9 @@ s32 MIOS32_USB_MIDI_PackageSend_NonBlocking(mios32_midi_package_t package)
 //! \param[in] package MIDI package
 //! \return 0: no error
 //! \return -1: USB not connected
-//! \note Applications shouldn't call this function directly, instead please use \ref MIOS32_MIDI layer functions
+//! \note Applications shouldn't call this function directly, instead please use \ref MIDI layer functions
 /////////////////////////////////////////////////////////////////////////////
-s32 MIOS32_USB_MIDI_PackageSend(mios32_midi_package_t package)
+s32 USB_MIDI_PackageSend(midi_package_t package)
 {
   static u16 timeout_ctr = 0;
   // this function could hang up if USB is available, but MIDI port won't be
@@ -188,7 +188,7 @@ s32 MIOS32_USB_MIDI_PackageSend(mios32_midi_package_t package)
 
   s32 error;
 
-  while( (error=MIOS32_USB_MIDI_PackageSend_NonBlocking(package)) == -2 ) {
+  while( (error=USB_MIDI_PackageSend_NonBlocking(package)) == -2 ) {
     if( timeout_ctr >= 10000 )
       break;
     ++timeout_ctr;
@@ -206,9 +206,9 @@ s32 MIOS32_USB_MIDI_PackageSend(mios32_midi_package_t package)
 //! \param[out] package pointer to MIDI package (received package will be put into the given variable)
 //! \return -1 if no package in buffer
 //! \return >= 0: number of packages which are still in the buffer
-//! \note Applications shouldn't call this function directly, instead please use \ref MIOS32_MIDI layer functions
+//! \note Applications shouldn't call this function directly, instead please use \ref MIDI layer functions
 /////////////////////////////////////////////////////////////////////////////
-s32 MIOS32_USB_MIDI_PackageReceive(mios32_midi_package_t *package)
+s32 USB_MIDI_PackageReceive(midi_package_t *package)
 {
   // package received?
   if( !rx_buffer_size )
@@ -217,7 +217,7 @@ s32 MIOS32_USB_MIDI_PackageReceive(mios32_midi_package_t *package)
   // get package - this operation should be atomic!
   IRQ_Disable();
   package->ALL = rx_buffer[rx_buffer_tail];
-  if( ++rx_buffer_tail >= MIOS32_USB_MIDI_RX_BUFFER_SIZE )
+  if( ++rx_buffer_tail >= USB_MIDI_RX_BUFFER_SIZE )
     rx_buffer_tail = 0;
   --rx_buffer_size;
   IRQ_Enable();
@@ -234,18 +234,18 @@ s32 MIOS32_USB_MIDI_PackageReceive(mios32_midi_package_t *package)
 //! For USB MIDI it also checks for incoming/outgoing USB packages!
 //!
 //! Not for use in an application - this function is called from
-//! MIOS32_MIDI_Periodic_mS(), which is called by a task in the programming
+//! MIDI_Periodic_mS(), which is called by a task in the programming
 //! model!
 //! 
 //! \return < 0 on errors
 /////////////////////////////////////////////////////////////////////////////
-s32 MIOS32_USB_MIDI_Periodic_mS(void)
+s32 USB_MIDI_Periodic_mS(void)
 {
 
-  MIOS32_USB_MIDI_RxBufferHandler();
+  USB_MIDI_RxBufferHandler();
 
   // check for packages which should be transmitted
-  MIOS32_USB_MIDI_TxBufferHandler();
+  USB_MIDI_TxBufferHandler();
 
   return 0;
 }
@@ -257,7 +257,7 @@ s32 MIOS32_USB_MIDI_Periodic_mS(void)
 //! This handler sends the new packages through the IN pipe if the buffer 
 //! is not empty
 /////////////////////////////////////////////////////////////////////////////
-static void MIOS32_USB_MIDI_TxBufferHandler(void)
+static void USB_MIDI_TxBufferHandler(void)
 {
   // before using the handle: ensure that device (and class) already configured
   if( USB_OTG_dev.dev.class_cb == NULL )
@@ -272,7 +272,7 @@ static void MIOS32_USB_MIDI_TxBufferHandler(void)
   IRQ_Disable();
 
   if( !tx_buffer_busy && tx_buffer_size && transfer_possible ) {
-    s16 count = (tx_buffer_size > (MIOS32_USB_MIDI_DATA_IN_SIZE/4)) ? (MIOS32_USB_MIDI_DATA_IN_SIZE/4) : tx_buffer_size;
+    s16 count = (tx_buffer_size > (USB_MIDI_DATA_IN_SIZE/4)) ? (USB_MIDI_DATA_IN_SIZE/4) : tx_buffer_size;
 
     // notify that new package is sent
     tx_buffer_busy = 1;
@@ -284,11 +284,11 @@ static void MIOS32_USB_MIDI_TxBufferHandler(void)
     int i;
     for(i=0; i<count; ++i) {
       *(buf_addr++) = tx_buffer[tx_buffer_tail];
-      if( ++tx_buffer_tail >= MIOS32_USB_MIDI_TX_BUFFER_SIZE )
+      if( ++tx_buffer_tail >= USB_MIDI_TX_BUFFER_SIZE )
 	tx_buffer_tail = 0;
     }
 
-    DCD_EP_Tx(&USB_OTG_dev, MIOS32_USB_MIDI_DATA_IN_EP, (uint8_t*)&USB_tx_buffer, count*4);
+    DCD_EP_Tx(&USB_OTG_dev, USB_MIDI_DATA_IN_EP, (uint8_t*)&USB_tx_buffer, count*4);
   }
 
   IRQ_Enable();
@@ -300,7 +300,7 @@ static void MIOS32_USB_MIDI_TxBufferHandler(void)
 //!
 //! This handler receives new packages if the Tx buffer is not full
 /////////////////////////////////////////////////////////////////////////////
-static void MIOS32_USB_MIDI_RxBufferHandler(void)
+static void USB_MIDI_RxBufferHandler(void)
 {
   s16 count;
 
@@ -313,24 +313,24 @@ static void MIOS32_USB_MIDI_RxBufferHandler(void)
   IRQ_Disable();
 
   // check if we can receive new data and get packages to be received from OUT pipe
-  u32 ep_num = MIOS32_USB_MIDI_DATA_OUT_EP & 0x7f;
+  u32 ep_num = USB_MIDI_DATA_OUT_EP & 0x7f;
   USB_OTG_EP *ep = &USB_OTG_dev.dev.out_ep[ep_num];
   if( rx_buffer_new_data && (count=ep->xfer_count>>2) ) {
     // check if buffer is free
-    if( count < (MIOS32_USB_MIDI_RX_BUFFER_SIZE-rx_buffer_size) ) {
+    if( count < (USB_MIDI_RX_BUFFER_SIZE-rx_buffer_size) ) {
       u32 *buf_addr = (u32 *)USB_rx_buffer;
 
       // copy received packages into receive buffer
       // this operation should be atomic
       do {
-	mios32_midi_package_t package;
+	midi_package_t package;
 	package.ALL = *buf_addr++;
 
-	//if( MIOS32_MIDI_SendPackageToRxCallback(USB0 + package.cable, package) == 0 ) 
+	//if( MIDI_SendPackageToRxCallback(USB0 + package.cable, package) == 0 ) 
 	{
 	  rx_buffer[rx_buffer_head] = package.ALL;
 
-	  if( ++rx_buffer_head >= MIOS32_USB_MIDI_RX_BUFFER_SIZE )
+	  if( ++rx_buffer_head >= USB_MIDI_RX_BUFFER_SIZE )
 	    rx_buffer_head = 0;
 	  ++rx_buffer_size;
 	}
@@ -341,9 +341,9 @@ static void MIOS32_USB_MIDI_RxBufferHandler(void)
 
       // configuration for next transfer
       DCD_EP_PrepareRx(&USB_OTG_dev,
-		       MIOS32_USB_MIDI_DATA_OUT_EP,
+		       USB_MIDI_DATA_OUT_EP,
 		       (uint8_t*)(USB_rx_buffer),
-		       MIOS32_USB_MIDI_DATA_OUT_SIZE);
+		       USB_MIDI_DATA_OUT_SIZE);
     }
   }
 
@@ -353,28 +353,28 @@ static void MIOS32_USB_MIDI_RxBufferHandler(void)
 
 /////////////////////////////////////////////////////////////////////////////
 //! Called by STM32 USB Device driver to check for IN streams
-//! \note Applications shouldn't call this function directly, instead please use \ref MIOS32_MIDI layer functions
+//! \note Applications shouldn't call this function directly, instead please use \ref MIDI layer functions
 //! \note also: bEP, bEPStatus only relevant for LPC17xx port
 /////////////////////////////////////////////////////////////////////////////
-void MIOS32_USB_MIDI_EP1_IN_Callback(u8 bEP __attribute__((__unused__)), u8 bEPStatus __attribute__((__unused__)))
+void USB_MIDI_EP1_IN_Callback(u8 bEP __attribute__((__unused__)), u8 bEPStatus __attribute__((__unused__)))
 {
   // package has been sent
   tx_buffer_busy = 0;
 
   // check for next package
-  MIOS32_USB_MIDI_TxBufferHandler();
+  USB_MIDI_TxBufferHandler();
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //! Called by STM32 USB Device driver to check for OUT streams
-//! \note Applications shouldn't call this function directly, instead please use \ref MIOS32_MIDI layer functions
+//! \note Applications shouldn't call this function directly, instead please use \ref MIDI layer functions
 //! \note also: bEP, bEPStatus only relevant for LPC17xx port
 /////////////////////////////////////////////////////////////////////////////
-void MIOS32_USB_MIDI_EP2_OUT_Callback(u8 bEP __attribute__((__unused__)), u8 bEPStatus __attribute__((__unused__)))
+void USB_MIDI_EP2_OUT_Callback(u8 bEP __attribute__((__unused__)), u8 bEPStatus __attribute__((__unused__)))
 {
   // put package into buffer
   rx_buffer_new_data = 1;
-  MIOS32_USB_MIDI_RxBufferHandler();
+  USB_MIDI_RxBufferHandler();
 }
 
 

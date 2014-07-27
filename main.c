@@ -3,10 +3,10 @@
 
 #include "libs/spi.h"
 
-#include "mios32_usb.h"
+#include "usb.h"
 //#include "midi.h"
 #include "libs/delay.h"
-#include "mios32_usb_midi.h"
+#include "usb_midi.h"
 
 
 /*
@@ -25,7 +25,7 @@ void SysTick_Handler(void)
 	static uint16_t button_event = 3;
 	uint16_t i;
 
-	MIOS32_USB_MIDI_Periodic_mS();
+	USB_MIDI_Periodic_mS();
 	
 	if(buttonsInitialized)
 	{
@@ -66,8 +66,7 @@ int main(void)
 	SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
 
 	DELAY_Init();
-	MIOS32_USB_Init(0);
-//	MIOS32_MIDI_Init(0);
+	USB_Init(0);
 	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 	
@@ -95,9 +94,9 @@ int main(void)
 	int loopcount = 0;
 	while(1)
 	{
-		mios32_midi_package_t rpack;
+		midi_package_t rpack;
 
-		int recv = MIOS32_USB_MIDI_PackageReceive(&rpack);
+		int recv = USB_MIDI_PackageReceive(&rpack);
 
 		if(recv != -1)
 		{
@@ -114,14 +113,14 @@ int main(void)
 		loopcount++;
 		if((loopcount == 50)||(loopcount == 150))
 		{
-			if(MIOS32_USB_MIDI_CheckAvailable(0))
+			if(USB_MIDI_CheckAvailable(0))
 			{
 				GPIOB->ODR           &=       ~(1<<12);
 			}
 		}
 		if((loopcount == 100)||(loopcount == 200))
 		{
-			if(MIOS32_USB_MIDI_CheckAvailable(0))
+			if(USB_MIDI_CheckAvailable(0))
 			{
 				GPIOB->ODR           |=       1<<12;
 			}
@@ -134,7 +133,7 @@ int main(void)
 		if(get_key_press(KEY_A))
 		{
 		
-			mios32_midi_package_t package;
+			midi_package_t package;
 
 			package.type     = CC;
 			package.event    = CC;
@@ -142,13 +141,13 @@ int main(void)
 			package.velocity = 100;
 
 	
-			MIOS32_USB_MIDI_PackageSend_NonBlocking(package);
+			USB_MIDI_PackageSend_NonBlocking(package);
 		}
 
 		if(get_key_press(KEY_B))
 		{
 		
-			mios32_midi_package_t package;
+			midi_package_t package;
 
 			package.type     = CC;
 			package.event    = CC;
@@ -156,7 +155,7 @@ int main(void)
 			package.velocity = 50;
 
 	
-			MIOS32_USB_MIDI_PackageSend_NonBlocking(package);
+			USB_MIDI_PackageSend_NonBlocking(package);
 		}
 			
 		DELAY_Wait_uS(1000);
