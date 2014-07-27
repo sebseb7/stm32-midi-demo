@@ -19,7 +19,8 @@
 // Include files
 /////////////////////////////////////////////////////////////////////////////
 
-#include <mios32.h>
+#include <mios32_usb.h>
+#include <mios32_usb_midi.h>
 
 // this module can be optionally disabled in a local mios32_config.h file (included from mios32.h)
 

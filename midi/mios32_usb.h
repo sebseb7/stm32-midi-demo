@@ -14,6 +14,8 @@
 #ifndef _MIOS32_USB_H
 #define _MIOS32_USB_H
 
+#include "main.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // Global definitions
 /////////////////////////////////////////////////////////////////////////////
@@ -37,6 +39,7 @@
 #define MIOS32_USB_VERSION_ID   0x0100        // v1.00
 #endif
 
+#define MIOS32_USB_MIDI_NUM_PORTS 1
 
 // internal defines which are used by MIOS32 USB MIDI/COM (don't touch)
 #define MIOS32_USB_EP_NUM   5
