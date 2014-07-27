@@ -815,7 +815,7 @@ void USBD_ParseSetupRequest( USB_OTG_CORE_HANDLE  *pdev,
 */
 
 void USBD_CtlError( USB_OTG_CORE_HANDLE  *pdev,
-                            USB_SETUP_REQ *req)
+                            USB_SETUP_REQ *req __attribute__((__unused__)))
 {
   
   DCD_EP_Stall(pdev , 0x80);

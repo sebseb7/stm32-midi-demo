@@ -621,7 +621,7 @@ static const __ALIGN_BEGIN u8 MIOS32_USB_ConfigDescriptor[MIOS32_USB_SIZ_CONFIG_
 * @param  length : pointer to data length variable
 * @retval pointer to descriptor buffer
 */
-static uint8_t *  USBD_USR_DeviceDescriptor( uint8_t speed , uint16_t *length)
+static uint8_t *  USBD_USR_DeviceDescriptor( uint8_t speed __attribute__((__unused__)), uint16_t *length)
 {
   *length = sizeof(MIOS32_USB_DeviceDescriptor);
   return (uint8_t *)MIOS32_USB_DeviceDescriptor;
@@ -634,7 +634,7 @@ static uint8_t *  USBD_USR_DeviceDescriptor( uint8_t speed , uint16_t *length)
 * @param  length : pointer to data length variable
 * @retval pointer to descriptor buffer
 */
-static uint8_t *  USBD_USR_LangIDStrDescriptor( uint8_t speed , uint16_t *length)
+static uint8_t *  USBD_USR_LangIDStrDescriptor( uint8_t speed __attribute__((__unused__)), uint16_t *length)
 {
   *length =  sizeof(USBD_LangIDDesc);  
   return (uint8_t *)USBD_LangIDDesc;
@@ -648,7 +648,7 @@ static uint8_t *  USBD_USR_LangIDStrDescriptor( uint8_t speed , uint16_t *length
 * @param  length : pointer to data length variable
 * @retval pointer to descriptor buffer
 */
-static uint8_t *  USBD_USR_ProductStrDescriptor( uint8_t speed , uint16_t *length)
+static uint8_t *  USBD_USR_ProductStrDescriptor( uint8_t speed __attribute__((__unused__)), uint16_t *length)
 {
   const uint8_t vendor_str[] = "STM32F4 Midi";
   USBD_GetString ((uint8_t*)vendor_str, USBD_StrDesc, length);
@@ -663,7 +663,7 @@ static uint8_t *  USBD_USR_ProductStrDescriptor( uint8_t speed , uint16_t *lengt
 * @param  length : pointer to data length variable
 * @retval pointer to descriptor buffer
 */
-static uint8_t *  USBD_USR_ManufacturerStrDescriptor( uint8_t speed , uint16_t *length)
+static uint8_t *  USBD_USR_ManufacturerStrDescriptor( uint8_t speed __attribute__((__unused__)), uint16_t *length)
 {
   const uint8_t vendor_str[] = MIOS32_USB_VENDOR_STR;
   USBD_GetString ((uint8_t*)vendor_str, USBD_StrDesc, length);
@@ -677,7 +677,7 @@ static uint8_t *  USBD_USR_ManufacturerStrDescriptor( uint8_t speed , uint16_t *
 * @param  length : pointer to data length variable
 * @retval pointer to descriptor buffer
 */
-static uint8_t *  USBD_USR_SerialStrDescriptor( uint8_t speed , uint16_t *length)
+static uint8_t *  USBD_USR_SerialStrDescriptor( uint8_t speed __attribute__((__unused__)), uint16_t *length)
 {
   const u8 serial_number_dummy_str[] = "42";
 
@@ -693,7 +693,7 @@ static uint8_t *  USBD_USR_SerialStrDescriptor( uint8_t speed , uint16_t *length
 * @param  length : pointer to data length variable
 * @retval pointer to descriptor buffer
 */
-static uint8_t *  USBD_USR_ConfigStrDescriptor( uint8_t speed , uint16_t *length)
+static uint8_t *  USBD_USR_ConfigStrDescriptor( uint8_t speed __attribute__((__unused__)), uint16_t *length)
 {
   const uint8_t vendor_str[] = "configstr";
   USBD_GetString ((uint8_t*)vendor_str, USBD_StrDesc, length);
@@ -708,7 +708,7 @@ static uint8_t *  USBD_USR_ConfigStrDescriptor( uint8_t speed , uint16_t *length
 * @param  length : pointer to data length variable
 * @retval pointer to descriptor buffer
 */
-static uint8_t *  USBD_USR_InterfaceStrDescriptor( uint8_t speed , uint16_t *length)
+static uint8_t *  USBD_USR_InterfaceStrDescriptor( uint8_t speed __attribute__((__unused__)), uint16_t *length)
 {
   const uint8_t vendor_str[] = "STM32F4IF";
   USBD_GetString ((uint8_t*)vendor_str, USBD_StrDesc, length);
@@ -753,7 +753,7 @@ static void USBD_USR_Init(void)
 * @param  speed : device speed
 * @retval None
 */
-static void USBD_USR_DeviceReset(uint8_t speed )
+static void USBD_USR_DeviceReset(uint8_t speed __attribute__((__unused__)) )
 {
 }
 
@@ -842,7 +842,7 @@ static const USBD_Usr_cb_TypeDef USBD_USR_Callbacks =
 * @retval None
 */
 
-void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
+void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev __attribute__((__unused__)))
 {
   GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -882,7 +882,7 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
 * @param  None
 * @retval None
 */
-void USB_OTG_BSP_EnableInterrupt(USB_OTG_CORE_HANDLE *pdev)
+void USB_OTG_BSP_EnableInterrupt(USB_OTG_CORE_HANDLE *pdev __attribute__((__unused__)))
 {
   IRQ_Install(OTG_FS_IRQn, IRQ_USB_PRIORITY);
 }
@@ -936,7 +936,7 @@ void USB_OTG_BSP_mDelay (const uint32_t msec)
   * @retval status
   */
 static uint8_t  MIOS32_USB_CLASS_Init (void  *pdev, 
-				       uint8_t cfgidx)
+				       uint8_t cfgidx __attribute__((__unused__)))
 {
   // Open Endpoints
   DCD_EP_Open(pdev, MIOS32_USB_MIDI_DATA_OUT_EP, MIOS32_USB_MIDI_DATA_OUT_SIZE, USB_OTG_EP_BULK);
@@ -959,7 +959,7 @@ static uint8_t  MIOS32_USB_CLASS_Init (void  *pdev,
   * @retval status
   */
 static uint8_t  MIOS32_USB_CLASS_DeInit (void  *pdev, 
-					 uint8_t cfgidx)
+					 uint8_t cfgidx __attribute__((__unused__)))
 {
   // Close Endpoints
   DCD_EP_Close(pdev, MIOS32_USB_MIDI_DATA_OUT_EP);
@@ -975,8 +975,8 @@ static uint8_t  MIOS32_USB_CLASS_DeInit (void  *pdev,
   * @param  req: usb requests
   * @retval status
   */
-static uint8_t  MIOS32_USB_CLASS_Setup (void  *pdev, 
-					USB_SETUP_REQ *req)
+static uint8_t  MIOS32_USB_CLASS_Setup (void  *pdev __attribute__((__unused__)), 
+					USB_SETUP_REQ *req __attribute__((__unused__)))
 {
   // not relevant for USB MIDI
 
@@ -989,7 +989,7 @@ static uint8_t  MIOS32_USB_CLASS_Setup (void  *pdev,
   * @param  pdev: device device instance
   * @retval status
   */
-static uint8_t  MIOS32_USB_CLASS_EP0_RxReady (void  *pdev)
+static uint8_t  MIOS32_USB_CLASS_EP0_RxReady (void  *pdev __attribute__((__unused__)))
 { 
   // not relevant for USB MIDI
   
@@ -1003,7 +1003,7 @@ static uint8_t  MIOS32_USB_CLASS_EP0_RxReady (void  *pdev)
   * @param  epnum: endpoint number
   * @retval status
   */
-static uint8_t  MIOS32_USB_CLASS_DataIn (void *pdev, uint8_t epnum)
+static uint8_t  MIOS32_USB_CLASS_DataIn (void *pdev __attribute__((__unused__)), uint8_t epnum)
 {
   if( epnum == (MIOS32_USB_MIDI_DATA_IN_EP & 0x7f) )
     MIOS32_USB_MIDI_EP1_IN_Callback(epnum, 0); // parameters not relevant for STM32F4
@@ -1018,7 +1018,7 @@ static uint8_t  MIOS32_USB_CLASS_DataIn (void *pdev, uint8_t epnum)
   * @param  epnum: endpoint number
   * @retval status
   */
-static uint8_t  MIOS32_USB_CLASS_DataOut (void *pdev, uint8_t epnum)
+static uint8_t  MIOS32_USB_CLASS_DataOut (void *pdev __attribute__((__unused__)), uint8_t epnum)
 {      
   if( epnum == MIOS32_USB_MIDI_DATA_OUT_EP )
     MIOS32_USB_MIDI_EP2_OUT_Callback(epnum, 0); // parameters not relevant for STM32F4
@@ -1033,13 +1033,13 @@ static uint8_t  MIOS32_USB_CLASS_DataOut (void *pdev, uint8_t epnum)
   * @param  length : pointer data length
   * @retval pointer to descriptor buffer
   */
-static uint8_t  *MIOS32_USB_CLASS_GetCfgDesc (uint8_t speed, uint16_t *length)
+static uint8_t  *MIOS32_USB_CLASS_GetCfgDesc (uint8_t speed __attribute__((__unused__)), uint16_t *length)
 {
   *length = sizeof (MIOS32_USB_ConfigDescriptor);
   return (uint8_t *)MIOS32_USB_ConfigDescriptor;
 }
 
-static uint8_t  *MIOS32_USB_CLASS_GetStrDesc (uint8_t speed, uint8_t index, uint16_t *length)
+static uint8_t  *MIOS32_USB_CLASS_GetStrDesc (uint8_t speed __attribute__((__unused__)), uint8_t index __attribute__((__unused__)), uint16_t *length)
 {
 	const uint8_t vendor_str[] = "MIDI 1";
 	USBD_GetString ((uint8_t*)vendor_str, USBD_StrDesc, length);

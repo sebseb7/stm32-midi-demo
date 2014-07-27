@@ -355,7 +355,7 @@ static void MIOS32_USB_MIDI_RxBufferHandler(void)
 //! \note Applications shouldn't call this function directly, instead please use \ref MIOS32_MIDI layer functions
 //! \note also: bEP, bEPStatus only relevant for LPC17xx port
 /////////////////////////////////////////////////////////////////////////////
-void MIOS32_USB_MIDI_EP1_IN_Callback(u8 bEP, u8 bEPStatus)
+void MIOS32_USB_MIDI_EP1_IN_Callback(u8 bEP __attribute__((__unused__)), u8 bEPStatus __attribute__((__unused__)))
 {
   // package has been sent
   tx_buffer_busy = 0;
@@ -369,7 +369,7 @@ void MIOS32_USB_MIDI_EP1_IN_Callback(u8 bEP, u8 bEPStatus)
 //! \note Applications shouldn't call this function directly, instead please use \ref MIOS32_MIDI layer functions
 //! \note also: bEP, bEPStatus only relevant for LPC17xx port
 /////////////////////////////////////////////////////////////////////////////
-void MIOS32_USB_MIDI_EP2_OUT_Callback(u8 bEP, u8 bEPStatus)
+void MIOS32_USB_MIDI_EP2_OUT_Callback(u8 bEP __attribute__((__unused__)), u8 bEPStatus __attribute__((__unused__)))
 {
   // put package into buffer
   rx_buffer_new_data = 1;
