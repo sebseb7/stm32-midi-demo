@@ -1,3 +1,3 @@
 # stm32-midi-demo
 
-use stm32 as usb midi device 
+use stm32f4 as (client) usb midi device 
